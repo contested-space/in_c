@@ -1,0 +1,378 @@
+;;An algorithmic automaton that plays a cheesy version of Terry Riley's "In C"
+;;Author : Fabien Lamarche-Filion
+;;Original composer: Terry Riley (1964)
+
+
+(begin
+
+(sys:load "/libs/core/instruments.xtm")
+
+
+(make-instrument synth0 fmsynth)
+(make-instrument synth1 fmsynth)
+(make-instrument synth2 fmsynth)
+
+(make-instrument analog0 analogue)
+(make-instrument analog1 analogue)
+(make-instrument analog2 analogue)
+
+
+(bind-func dsp:DSP
+  (lambda (in time chan dat)
+    (+ (* 0.5 (synth0 in time chan dat))
+       (* 0.5 (synth1 in time chan dat))
+       (* 0.5 (synth2 in time chan dat))
+       (* 1.0 (analog0 in time chan dat))
+       (* 1.3 (analog1 in time chan dat))
+       (* 1.5 (analog2 in time chan dat)))))
+
+(dsp:set! dsp)
+
+(define play-list
+  (lambda (time instr evt-lst dur-lst velo-lst)
+    (if (not (eq? '() evt-lst))
+      (begin
+        (play-note time instr (car evt-lst) (car velo-lst) (car dur-lst))
+        (callback (+ time (car dur-lst)) 'play-list (+ time (car dur-lst))
+                                                    instr
+                                                    (cdr evt-lst)
+                                                    (cdr dur-lst)
+                                                    (cdr velo-lst))))))
+
+;;return rythm durations in samples
+(define convert-rythm-to-duration
+  (lambda (rythm-lst)
+    (let ((unit (/ *second* 2)))
+      (map (lambda (x) (* x unit)) rythm-lst))))
+
+(define switch-probability
+  (lambda (rythm-lst)
+    (let ((duration (* *second* 15)))
+      (/ (foldl + 0 (convert-rythm-to-duration rythm-lst)) duration))))
+
+(define cell-notes
+  (lambda (cell)
+    (car cell)))
+
+(define cell-rythm
+  (lambda (cell)
+    (car (cdr cell))))
+
+(define cell-velo
+  (lambda (cell)
+    (car (cdr (cdr cell)))))
+
+(define cell
+  (lambda (cell-number)
+    (case cell-number
+      ((1) (list 
+             (list 60 64 60 64 60 64)
+             (list 0.1 0.9 0.1 0.9 0.1 0.9)
+             (list 60 80 60 70 60 70)))
+      ((2) (list 
+             (list 60 64 67 64)
+             (list 0.1 0.4 0.5 1)
+             (list 60 80 60 60)))
+      ((3) (list
+             (list 0 64 65 64)
+             (list 0.5 0.5 0.5 0.5)
+             (list 0 60 80 60)))
+      ((4) (list
+             (list 0 64 65 67)
+             (list 0.5 0.5 0.5 0.5)
+             (list 0 60 80 60)))
+      ((5) (list
+             (list 64 65 67 0)
+             (list 0.5 0.5 0.5 0.5)
+             (list 60 80 60 0)))
+      ((6) (list
+             (list 72)
+             (list 8)
+             (list 80)))
+      ((7) (list
+             (list 0 0 0 0 60 60 60 0 0 0 0 0)
+             (list 1 1 1 0.5 0.25 0.25 0.5 0.5 1 1 1 1)
+             (list 0 0 0 0 80 60 75 0 0 0 0 0)))
+      ((8) (list
+             (list 67 65)
+             (list 6 8)
+             (list 80 70)))
+      ((9) (list
+             (list 71 67 0 0 0 0)
+             (list 0.25 0.25 0.5 1 1 1)
+             (list 80 60 0 0 0 0)))
+      ((10) (list
+             (list 71 67)
+             (list 0.25 0.25)
+             (list 80 70)))
+      ((11) (list
+             (list 65 67 71 67 71 67)
+             (list 0.25 0.25 0.25 0.25 0.25 0.25)
+             (list 80 70 60 75 79 60)))
+      ((12) (list
+             (list 65 67 71 72)
+             (list 0.5 0.5 4 1)
+             (list 80 70 75 70)))
+      ((13) (list
+             (list 71 67 67 65 67 0 67)
+             (list 0.25 0.75 0.25 0.25 0.5 0.5 4.25)
+             (list 80 70 70 65 70 0 65)))
+      ((14) (list
+             (list 72 71 67 66)
+             (list 4 4 4 4)
+             (list 80 70 70 70)))
+      ((15) (list
+             (list 67 0 0 0 0)
+             (list 0.25 0.75 1 1 1)
+             (list 80 0 0 0 0)))
+      ((16) (list
+             (list 67 71 72 71)
+             (list 0.25 0.25 0.25 0.25)
+             (list 80 60 70 60)))
+      ((17) (list
+             (list 71 72 71 72 71 0)
+             (list 0.25 0.25 0.25 0.25 0.25 0.25)
+             (list 80 60 70 60 70 0)))
+      ((18) (list
+             (list 64 66 64 66 64 64)
+             (list 0.25 0.25 0.25 0.25 0.75 0.25)
+             (list 80 60 70 60 80 70)))
+      ((19) (list
+             (list 0 79)
+             (list 1.5 1.5)
+             (list 0 80)))
+      ((20) (list
+             (list 64 66 64 66 55 64 66 64 66 64)
+             (list 0.25 0.25 0.25 0.25 0.75 0.25 0.25 0.25 0.25 0.25)
+             (list 80 60 70 60 80 60 75 70 70 60)))
+      ((21) (list
+             (list 66 )
+             (list 3)
+             (list 80)))
+      ((22) (list
+             (list 64 64 64 64 64 66 67 69 71)
+             (list 1.5 1.5 1.5 1.5 1.5 1.5 1.5 1.5 0.5)
+             (list 80 60 60 60 60 60 60 60 60)))
+      ((23) (list
+             (list 64 66 66 66 66 66 67 69 71)
+             (list 0.5 1.5 1.5 1.5 1.5 1.5 1.5 1.5 1)
+             (list 80 60 60 60 60 60 60 60 60)))
+      ((24) (list
+             (list 64 66 67 67 67 67 67 69 71)
+             (list 0.5 0.5 1.5 1.5 1.5 1.5 1.5 1.5 0.5)
+             (list 80 60 60 60 60 60 60 60 60)))
+      ((25) (list
+             (list 64 66 67 69 69 69 69 69 71)
+             (list 0.5 0.5 0.5 1.5 1.5 1.5 1.5 1.5 1.5)
+             (list 80 60 60 60 60 60 60 60 60)))
+      ((26) (list
+             (list 64 66 67 69 71 71 71 71 71)
+             (list 0.5 0.5 0.5 0.5 1.5 1.5 1.5 1.5 1.5)
+             (list 80 60 60 60 60 60 60 60 60)))
+      ((27) (list
+             (list 64 66 64 66 67 64 67 66 64 66 64)
+             (list 0.25 0.25 0.25 0.25 0.5 0.25 0.25 0.25 0.25 0.25 0.25 0.25)
+             (list 80 60 70 60 80 70 60 80 60 70 60)))
+      ((28) (list
+             (list 64 66 64 66 64 64)
+             (list 0.25 0.25 0.25 0.25 0.75 0.25)
+             (list 80 60 70 60 80 70)))
+      ((29) (list
+             (list 64 67 72)
+             (list 3 3 3)
+             (list 80 80 80)))
+      ((30) (list
+             (list 72)
+             (list 6)
+             (list 80)))
+      ((31) (list
+             (list 67 65 67 71 67 71)
+             (list 0.25 0.25 0.25 0.25 0.25 0.25)
+             (list 80 60 60 80 60 60)))
+      ((32) (list
+             (list 65 67 65 67 71 65 67)
+             (list 0.25 0.25 0.25 0.25 0.25 3.25 1.5)
+             (list 80 60 60 80 60 60 70)))
+      ((33) (list
+             (list 67 65 0)
+             (list 0.25 0.25 0.5)
+             (list 80 60 0)))
+      ((34) (list
+             (list 67 65)
+             (list 0.25 0.25)
+             (list 80 60)))
+      ((35) (list
+             (list 65 67 71 67 71 67 71 67 71 67 0 0 0 0 70 79 81 79 83 81 79 76 79 78 0 0 0 76 77)
+             (list 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.5 1 1 1 1 3 0.5 1 0.5 1.5 0.5 3 0.5 3.5 1 1 0.5 2.5 6)
+             (list 80 60 60 60 80 60 60 60 80 60 0 0 0 0 80 70 80 60 70 60 70 60 80 65 0 0 0 80 80)))
+      ((36) (list 
+             (list 65 67 71 67 71 67)
+             (list 0.25 0.25 0.25 0.25 0.25 0.25)
+             (list 80 65 65 70 60 60)))
+      ((37) (list 
+             (list 65 67)
+             (list 0.25 0.25)
+             (list 80 60)))
+      ((38) (list 
+             (list 65 67 71)
+             (list 0.25 0.25 0.25)
+             (list 80 60 60)))
+      ((39) (list
+             (list 71 67 65 67 71 72)
+             (list 0.25 0.25 0.25 0.25 0.25 0.25)
+             (list 80 60 60 80 60 60)))
+      ((40) (list
+             (list 71 65)
+             (list 0.25 0.25)
+             (list 80 60)))
+      ((41) (list
+             (list 71 67)
+             (list 0.25 0.25)
+             (list 80 60)))
+      ((42) (list 
+             (list 72 71 69 72)
+             (list 4 4 4 4)
+             (list 80 70 70 65)))
+      ((43) (list
+             (list 77 76 77 76 76 76 76 77 76)
+             (list 0.25 0.25 0.25 0.25 0.5 0.5 0.5 0.25 0.25)
+             (list 80 60 70 60 80 70 80 70 60)))
+      ((44) (list
+             (list 77 76 76 72)
+             (list 0.5 1 0.5 1)
+             (list 80 70 60 70)))
+      ((45) (list
+             (list 74 74 67)
+             (list 1 1 1)
+             (list 80 70 70)))
+      ((46) (list 
+             (list 67 74 76 74 0 67 0 67 0 67 67 74 76 74)
+             (list 0.25 0.25 0.25 0.25 0.5 0.5 0.5 0.5 0.5 0.5 0.25 0.25 0.25 0.25)
+             (list 80 60 70 60 0 70 0 70 0 70 80 60 70 60)))
+      ((47) (list 
+             (list 74 76 74)
+             (list 0.25 0.25 0.5)
+             (list 80 60 70)))
+      ((48) (list
+             (list 67 67 65)
+             (list 6 4 5)
+             (list 80 80 80)))
+      ((49) (list 
+             (list 65 67 70 67 70 67)
+             (list 0.25 0.25 0.25 0.25 0.25 0.25)
+             (list 80 60 70 60 70 60)))
+      ((50) (list
+             (list 65 67)
+             (list 0.25 0.25)
+             (list 80 60)))
+      ((51) (list
+             (list 65 67 70)
+             (list 0.25 0.25 0.25)
+             (list 80 70 60)))
+      ((52) (list
+             (list 67 70)
+             (list 0.25 0.25)
+             (list 80 60)))
+      ((53) (list 
+              (list 70 67)
+              (list 0.25 0.25)
+              (list 80 60)))
+      ((54) (list
+              (list 60)
+              (list 16)
+              (list 60)))
+
+
+
+
+      (else "garbage"))))
+
+(define first-cell
+  (lambda (cells-playing)
+    (apply max cells-playing)))
+
+(define last-cell
+  (lambda (cells-playing)
+    (apply min cells-playing)))
+
+(define list-set!
+  (lambda (lst idx val)
+    (set-car! (list-tail lst idx) val)))
+
+(define play-cell
+  (lambda (time inst cell-number octave)
+    (let ((cel (cell cell-number)))
+      (play-list time 
+                 inst 
+                 (map (lambda (x) (+ x (* 12 octave))) (cell-notes cel)) 
+                 (convert-rythm-to-duration (cell-rythm cel))  
+                 (cell-velo cel)))))
+
+(define play-n-times-cell
+  (lambda (time inst cell-number octave n)
+    (if (> n 0)
+      (begin
+        (play-cell time inst cell-number octave)
+        (let ((dur (foldl + 0 (convert-rythm-to-duration (cell-rythm (cell cell-number))))))
+          (callback (+ time (/ dur 2)) 'play-n-times-cell (+ time dur) inst cell-number octave (- n 1)))))))
+
+(define play-cell-probability
+  (lambda (time inst cell-number octave)
+    (play-cell time inst cell-number octave)
+    (if (> (random) (switch-probability (cell-rythm (cell cell-number))))
+      (let ((dur (foldl + 0 (convert-rythm-to-duration (cell-rythm (cell cell-number))))))
+          (callback (+ time (/ dur 2)) 'play-cell-probability (+ time dur) inst cell-number)))))
+
+(define play-cells-in-sequence
+  (lambda (time inst octave cell-number musician-number)
+    (play-cell time inst cell-number octave)
+    (let ((dur (foldl + 0 (convert-rythm-to-duration (cell-rythm (cell cell-number))))))
+      (if (and (< (random) (switch-probability (cell-rythm (cell cell-number))))
+               (or (< (- (first-cell cells-playing) (last-cell cells-playing)) 2)
+                   (< (list-ref cells-playing musician-number) (first-cell cells-playing))))
+          (begin
+            (print "musician:")
+            (print musician-number)
+            (print " is now playing cell ")
+            (println (+ cell-number 1))
+            (print "first:")
+            (println (first-cell cells-playing))
+            (print "last:")
+            (println (last-cell cells-playing))
+            (list-set! cells-playing musician-number (+ cell-number 1))
+            (callback (+ time (* dur 0.95)) 'play-cells-in-sequence (+ time dur) 
+                                                                 inst 
+                                                                 octave 
+                                                                 (+ cell-number 1) 
+                                                                 musician-number))
+          (callback (+ time (* dur 0.95)) 'play-cells-in-sequence (+ time dur) 
+                                                               inst 
+                                                               octave 
+                                                               cell-number 
+                                                               musician-number)))))
+
+(define start-musician
+  (lambda (time inst octave beginning)
+    (begin
+      (set! cells-playing (append cells-playing (list beginning)))
+      (let ((musician-number (- (length cells-playing) 1)))
+        (play-cells-in-sequence time inst octave beginning musician-number)))))
+
+(define cells-playing '())
+
+(define start-song
+  (lambda (time beginning)
+    (set! cells-playing '())
+    (start-musician time synth0 1 beginning)
+    (start-musician time synth1 2 beginning)
+    (start-musician time synth2 0 beginning)
+    (start-musician time analog0 0 beginning)
+    (start-musician time analog1 -1 beginning)
+    (start-musician time analog2 -2 beginning)))
+
+
+(start-song (now) 1)
+
+
+)
+
