@@ -12,21 +12,110 @@
 (make-instrument synth1 fmsynth)
 (make-instrument synth2 fmsynth)
 
-(make-instrument analog0 analogue)
-(make-instrument analog1 analogue)
-(make-instrument analog2 analogue)
+(make-instrument synth3 fmsynth)
+(make-instrument synth4 fmsynth)
+(make-instrument synth5 fmsynth)
+
+(make-instrument synth6 fmsynth)
+(make-instrument synth7 fmsynth)
+(make-instrument synth8 fmsynth)
+
+(make-instrument synth9 fmsynth)
+(make-instrument synth10 fmsynth)
+(make-instrument synth11 fmsynth)
+
+(make-instrument synth12 fmsynth)
+(make-instrument synth13 fmsynth)
+(make-instrument synth14 fmsynth)
+(make-instrument synth15 fmsynth)
+
+(make-instrument synth16 fmsynth)
+(make-instrument synth17 fmsynth)
+(make-instrument synth18 fmsynth)
+
+(make-instrument synth19 fmsynth)
+(make-instrument synth20 fmsynth)
+(make-instrument synth21 fmsynth)
+
+(make-instrument synth22 fmsynth)
+(make-instrument synth23 fmsynth)
+(make-instrument synth24 fmsynth)
+
+(make-instrument synth25 fmsynth)
+(make-instrument synth26 fmsynth)
+(make-instrument synth27 fmsynth)
+
+(make-instrument synth28 fmsynth)
+(make-instrument synth29 fmsynth)
+(make-instrument synth30 fmsynth)
+
+(make-instrument synth31 fmsynth)
+(make-instrument synth32 fmsynth)
+(make-instrument synth33 fmsynth)
 
 
-(bind-func dsp:DSP
+(bind-func dsp1:DSP
   (lambda (in time chan dat)
     (+ (* 0.5 (synth0 in time chan dat))
        (* 0.5 (synth1 in time chan dat))
        (* 0.5 (synth2 in time chan dat))
-       (* 1.0 (analog0 in time chan dat))
-       (* 1.3 (analog1 in time chan dat))
-       (* 1.5 (analog2 in time chan dat)))))
+       (* 0.5 (synth3 in time chan dat))
+       (* 0.5 (synth4 in time chan dat))
+       (* 0.5 (synth5 in time chan dat))
+       (* 0.5 (synth6 in time chan dat))
+       (* 0.5 (synth7 in time chan dat)))))
 
-(dsp:set! dsp)
+(bind-func dsp2:DSP
+  (lambda (in time chan dat)
+    (+ (* 0.5 (synth8 in time chan dat))
+       (* 0.5 (synth9 in time chan dat))
+       (* 0.5 (synth10 in time chan dat))
+       (* 0.5 (synth11 in time chan dat))
+       (* 0.5 (synth12 in time chan dat))
+       (* 0.5 (synth13 in time chan dat))
+       (* 0.5 (synth14 in time chan dat))
+       (* 0.5 (synth15 in time chan dat)))))
+
+(bind-func dsp3:DSP
+  (lambda (in time chan dat)
+    (+ (* 0.5 (synth16 in time chan dat))
+       (* 0.5 (synth17 in time chan dat))
+       (* 0.5 (synth18 in time chan dat))
+       (* 0.5 (synth19 in time chan dat))
+       (* 0.5 (synth20 in time chan dat))
+       (* 0.5 (synth21 in time chan dat))
+       (* 0.5 (synth22 in time chan dat))
+       (* 0.5 (synth23 in time chan dat)))))
+
+(bind-func dsp4:DSP
+  (lambda (in time chan dat)
+    (+ (* 0.5 (synth24 in time chan dat))
+       (* 0.5 (synth25 in time chan dat))
+       (* 0.5 (synth26 in time chan dat))
+       (* 0.5 (synth27 in time chan dat))
+       (* 0.5 (synth28 in time chan dat))
+       (* 0.5 (synth29 in time chan dat))
+       (* 0.5 (synth30 in time chan dat))
+       (* 0.5 (synth31 in time chan dat)))))
+
+(bind-func dsp:DSPMT
+  (lambda (in time chan dat)
+    (cond ((< chan 2)
+           (+ (pref in 0)   ;; dsp 1
+              (pref in 1)   ;; dsp 2
+              (pref in 2)   ;; dsp 3
+              (pref in 3))) ;; dsp 4
+          (else 0.0))))
+         
+
+(dsp:set! dsp dsp1 dsp2 dsp3 dsp4)
+
+)
+
+
+;(play-note (now) synth0 60 80 *second*)
+
+(begin
 
 (define play-list
   (lambda (time instr evt-lst dur-lst velo-lst)
@@ -366,9 +455,40 @@
     (start-musician time synth0 1 beginning)
     (start-musician time synth1 2 beginning)
     (start-musician time synth2 0 beginning)
-    (start-musician time analog0 0 beginning)
-    (start-musician time analog1 -1 beginning)
-    (start-musician time analog2 -2 beginning)))
+    ;(start-musician time analog0 0 beginning)
+    ;(start-musician time analog1 -1 beginning)
+    ;(start-musician time analog2 -2 beginning)
+
+    (start-musician time synth3 1 beginning)
+    ;(start-musician time synth4 2 beginning)
+    ;(start-musician time synth5 0 beginning)
+    ;(start-musician time synth6 1 beginning)
+    (start-musician time synth7 2 beginning)
+    (start-musician time synth8 0 beginning)
+    (start-musician time synth9 1 beginning)
+    (start-musician time synth10 2 beginning)
+    (start-musician time synth11 0 beginning)
+    ;(start-musician time synth12 1 beginning)
+    ;(start-musician time synth13 2 beginning)
+    ;(start-musician time synth14 0 beginning)
+    (start-musician time synth15 1 beginning)
+    (start-musician time synth16 2 beginning)
+    (start-musician time synth17 0 beginning)
+    (start-musician time synth18 1 beginning)
+    (start-musician time synth19 2 beginning)
+    ;(start-musician time synth20 0 beginning)
+    ;(start-musician time synth21 1 beginning)
+    ;(start-musician time synth22 2 beginning)
+    (start-musician time synth23 0 beginning)
+    (start-musician time synth24 1 beginning)
+    (start-musician time synth25 2 beginning)
+    (start-musician time synth26 0 beginning)
+    (start-musician time synth27 1 beginning)
+    (start-musician time synth28 2 beginning)
+    ;(start-musician time synth29 0 beginning)
+    ;(start-musician time synth30 1 beginning)
+    ;(start-musician time synth31 2 beginning)
+    (start-musician time synth32 0 beginning)))
 
 
 (start-song (now) 1)
